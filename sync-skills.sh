@@ -43,63 +43,87 @@ if [[ "$DRY_RUN" == false ]]; then
 fi
 
 # ==============================================================================
-# Step 1 — Copy / update skills
+# Step 1 — Copy / update skills (supports nested: skills/<group>/<skill>/)
+#
+#   Logic:
+#     - Source layout: skills/<group>/<skill>/SKILL.md
+#     - Target layout: ~/.claude/skills/<group>/<skill>/SKILL.md
+#     - Each <skill> is compared individually (not the whole <group>).
 # ==============================================================================
 log "Source: $SOURCE_DIR"
 log "Target: $TARGET_DIR"
 
 changes=0
 
-for skill_path in "$SOURCE_DIR"/*/; do
-  [[ -d "$skill_path" ]] || continue
-  skill_name="$(basename "$skill_path")"
-  target_path="$TARGET_DIR/$skill_name"
+# Fix: ((changes++)) returns exit 1 when changes=0, breaking "set -e"
+# Use changes=$((changes+1)) or ||: to avoid premature exit
+
+# Collect all skills across all groups
+# Depth from SOURCE_DIR: skills/<group>/<skill>/SKILL.md = depth 3
+find "$SOURCE_DIR" -mindepth 3 -maxdepth 3 -name "SKILL.md" | sort | while read -r src_skill_md; do
+  src_skill_dir="$(dirname "$src_skill_md")"
+
+  # Derive group and skill name from path:
+  #   skills/<group>/<skill>/SKILL.md
+  relative="${src_skill_dir#$SOURCE_DIR/}"   # e.g. security/secrets-detection
+  group_name="${relative%/*}"                 # e.g. security
+  skill_name="${relative#*/}"                # e.g. secrets-detection
+
+  target_group="$TARGET_DIR/$group_name"
+  target_path="$target_group/$skill_name"
+
+  # Compare mtime — if source is newer → update
+  source_mtime=$(stat -f '%m' "$src_skill_md" 2>/dev/null || echo 0)
+  target_skill_md="$target_path/SKILL.md"
+  target_mtime=$(stat -f '%m' "$target_skill_md" 2>/dev/null || echo 0)
 
   if [[ -d "$target_path" ]]; then
-    # Compare mtime of SKILL.md (or any .md) — if source is newer → update
-    source_mtime=$(stat -f '%m' "${skill_path}SKILL.md" 2>/dev/null || echo 0)
-    target_mtime=$(stat -f '%m' "$target_path/SKILL.md" 2>/dev/null || echo 0)
-
     if [[ "$source_mtime" -gt "$target_mtime" ]]; then
       if [[ "$DRY_RUN" == true ]]; then
-        log "[DRY RUN] UPDATE   $skill_name (source is newer)"
+        log "[DRY RUN] UPDATE   $group_name/$skill_name"
       else
-        cp -r "$skill_path" "$target_path"
-        log "UPDATED  $skill_name"
+        mkdir -p "$target_group"
+        cp -r "$src_skill_dir" "$target_path"
+        log "UPDATED  $group_name/$skill_name"
       fi
-      ((changes++))
+      changes=$((changes+1))
     else
-      log "UNCHANGED $skill_name"
+      log "UNCHANGED $group_name/$skill_name"
     fi
   else
     if [[ "$DRY_RUN" == true ]]; then
-      log "[DRY RUN] ADD      $skill_name"
+      log "[DRY RUN] ADD      $group_name/$skill_name"
     else
-      cp -r "$skill_path" "$target_path"
-      log "ADDED    $skill_name"
+      mkdir -p "$target_group"
+      cp -r "$src_skill_dir" "$target_path"
+      log "ADDED    $group_name/$skill_name"
     fi
-    ((changes++))
+    changes=$((changes+1))
   fi
 done
 
 # ==============================================================================
 # Step 2 — Remove skills no longer in source (with backup)
 # ==============================================================================
-for skill_path in "$TARGET_DIR"/*/; do
-  [[ -d "$skill_path" ]] || continue
-  skill_name="$(basename "$skill_path")"
-  source_skill="$SOURCE_DIR/$skill_name"
+find "$TARGET_DIR" -mindepth 3 -maxdepth 3 -name "SKILL.md" | sort | while read -r tgt_skill_md; do
+  tgt_skill_dir="$(dirname "$tgt_skill_md")"
 
-  if [[ ! -d "$source_skill" ]]; then
+  relative="${tgt_skill_dir#$TARGET_DIR/}"  # e.g. security/secrets-detection
+  group_name="${relative%/*}"
+  skill_name="${relative#*/}"
+
+  src_skill_dir="$SOURCE_DIR/$group_name/$skill_name"
+
+  if [[ ! -d "$src_skill_dir" ]]; then
     if [[ "$DRY_RUN" == true ]]; then
-      log "[DRY RUN] REMOVE   $skill_name (would back up → $BACKUP_DIR)"
+      log "[DRY RUN] REMOVE   $group_name/$skill_name (would back up → $BACKUP_DIR)"
     else
       ts=$(timestamp)
-      backup_path="$BACKUP_DIR/${skill_name}_${ts}"
-      mv "$skill_path" "$backup_path"
-      log "REMOVED  $skill_name → backed up to $backup_path"
+      backup_path="$BACKUP_DIR/${group_name}_${skill_name}_${ts}"
+      mv "$tgt_skill_dir" "$backup_path"
+      log "REMOVED  $group_name/$skill_name → backed up to $backup_path"
     fi
-    ((changes++))
+    changes=$((changes+1))
   fi
 done
 
