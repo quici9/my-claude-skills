@@ -1,6 +1,6 @@
 # 🧠 My Claude Skills
 
-> **45 skills** · **12 nhóm** · Dùng tiếng Việt hoặc tiếng Anh
+> **48 skills** · **13 nhóm** · Dùng tiếng Việt hoặc tiếng Anh
 
 ## Cách trigger
 
@@ -57,6 +57,9 @@
 | ⚡ Automation | Script Generator | "viết script", "tự động hóa" |
 | | Data Pipeline | "build ETL", "đồng bộ data" |
 | | Cron & Scheduler | "đặt lịch cron", "schedule task" |
+| 💡 Idea Validation | Feature Validator | "đánh giá feature", "nên build không" |
+| | Product Idea Validator | "validate ý tưởng", "đánh giá startup" |
+| | Technical Solution Evaluator | "đánh giá giải pháp kỹ thuật", "A vs B" |
 | 📝 Docs | Lean SRS | "viết SRS", "tài liệu yêu cầu" |
 | | API Spec OpenAPI | "thiết kế API spec", "OpenAPI" |
 | | ADR + SDD Lite | "viết ADR", "ghi quyết định kiến trúc" |
@@ -67,4 +70,4 @@
 
 ---
 
-*Cập nhật: Tháng 4/2026 · 45/45 skills*
+*Cập nhật: Tháng 4/2026 · 48/48 skills · 13 nhóm*
