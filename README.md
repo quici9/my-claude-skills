@@ -1,6 +1,6 @@
 # 🧠 My Claude Skills
 
-> **48 skills** · **13 nhóm** · Dùng tiếng Việt hoặc tiếng Anh
+> **52 skills** · **13 nhóm** · Dùng tiếng Việt hoặc tiếng Anh
 
 ## Cách trigger
 
@@ -37,6 +37,10 @@
 | 🔐 Security | OWASP Web Checklist | "check OWASP", "kiểm tra bảo mật" |
 | | Auth & AuthZ Security | "thêm authentication", "JWT token" |
 | | API Security Hardening | "bảo mật API", "CORS setup" |
+| | Secrets Detection | "quet secrets", "phat hien API key lo" |
+| | Dependency Scanning | "CVE scan", "kiem tra thu vien lo hong" |
+| | Container Security | "bao mat container", "Dockerfile hardening" |
+| | IaC Security | "quet Terraform", "kiem tra Kubernetes YAML" |
 | 💰 Finance | Investment Analysis | "đầu tư gì", "so sánh kênh đầu tư" |
 | | Personal Budget Planner | "lập ngân sách", "quản lý tiền" |
 | | Financial Goal Tracker | "mục tiêu tiết kiệm", "theo dõi FIRE" |
@@ -70,4 +74,4 @@
 
 ---
 
-*Cập nhật: Tháng 4/2026 · 48/48 skills · 13 nhóm*
+*Cập nhật: Tháng 4/2026 · 52/52 skills · 13 nhóm*
